@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}{{ child.name }}'s Profile{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Child Profile (LEFT) -->
+    <div class="col-md-4">
+        <div class="profile-card text-center mb-4">
+            {% if child.profile_pic %}
+                <img src="{{ url_for('static', filename='uploads/' + child.profile_pic) }}" 
+                     alt="Profile Pic" class="profile-pic mb-3">
+            {% else %}
+                <img src="{{ url_for('static', filename='default_baby.png') }}" 
+                     alt="Profile Pic" class="profile-pic mb-3">
+            {% endif %}
+            <h3>{{ child.name }}</h3>
+            <p>Gender: {{ child.gender or 'N/A' }}</p>
+            <p>DOB: {{ child.dob.strftime('%Y-%m-%d') }}</p>
+            <div class="profile-actions mb-3">
+                <a href="{{ url_for('edit_child', child_id=child.id) }}" class="btn btn-edit">Edit Profile</a>
+                <a href="{{ url_for('delete_child', child_id=child.id) }}" 
+                   class="btn btn-delete btn-sm" 
+                   onclick="return confirm('Are you sure to delete?')">Delete</a>
+            </div>
+            <!-- Growth Tracking Bar/Button at the bottom of profile card -->
+            <div class="alert alert-info d-flex justify-content-between align-items-center mt-3" style="cursor:pointer;" onclick="window.location='{{ url_for('growth_history', child_id=child.id) }}'">
+                <span><strong>Growth Tracking:</strong> Monitor your child's height and weight monthly!</span>
+                <button class="btn btn-primary btn-sm">View Growth Chart</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vaccine Schedule and Growth Tracking (RIGHT) -->
+    <div class="col-md-8">
+        <!-- Vaccine Schedule with Tabs -->
+        <ul class="nav nav-tabs" id="ageGroupTabs" role="tablist">
+            {% for age_group in grouped_records.keys() %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link {% if loop.first %}active{% endif %}" 
+                        id="tab-{{ loop.index }}" 
+                        data-bs-toggle="tab" 
+                        data-bs-target="#age-{{ loop.index }}" 
+                        type="button" role="tab">
+                    {{ age_group }}
+                </button>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <div class="tab-content mt-3">
+            {% for age_group, vaccines in grouped_records.items() %}
+            <div class="tab-pane fade {% if loop.first %}show active{% endif %}" 
+                 id="age-{{ loop.index }}" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-primary text-center">
+                            <tr>
+                                <th>Vaccine Name</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Dose</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vaccine_name, records in vaccines.items() %}
+                                {% for record in records %}
+                                <tr class="text-center">
+                                    <td>{{ vaccine_name }}</td>
+                                    <td>{{ record.due_date.strftime('%Y-%m-%d') if record.due_date else 'N/A' }}</td>
+                                    <td>
+                                        {% if record.date_taken %}
+                                            <span class="badge bg-success">Completed</span>
+                                        {% elif record.due_date and record.due_date < current_date %}
+                                            <span class="badge bg-danger">Missed</span>
+                                        {% else %}
+                                            <span class="badge bg-primary">Upcoming</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ record.dose_number if record.dose_number else 'N/A' }}</td>
+                                    <td>
+                                        {% if not record.date_taken %}
+                                            <a href="{{ url_for('mark_completed', record_id=record.id) }}" 
+                                               class="btn btn-sm btn-success"
+                                               onclick="return confirm('Are you sure you want to mark this vaccine as completed?');">
+                                                Mark as Taken
+                                            </a>
+                                        {% else %}
+                                            <a href="{{ url_for('download_vaccine_report', record_id=record.id) }}"
+                                               class="btn btn-sm btn-warning">
+                                                Download
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

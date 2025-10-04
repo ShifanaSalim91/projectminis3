@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Childcare - Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="site-header">
+        <h1>👶 Smart Childcare</h1>
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('login') }}" class="btn-login">Login</a>
+            <a href="{{ url_for('register') }}" class="btn-register">Register</a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-text">
+            <h2>Welcome to <span>Smart Childcare</span></h2>
+            <p>Your partner in keeping children healthy and growing strong.</p>
+            <div class="hero-buttons">
+                <a href="{{ url_for('login') }}" class="btn-login">Login</a>
+                <a href="{{ url_for('register') }}" class="btn-register">Register</a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <img src="{{ url_for('static', filename='baby1.jpg') }}" alt="Happy Baby">
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="feature-card">
+            <img src="{{ url_for('static', filename='vaccine.jpg') }}" alt="Vaccine Reminder">
+            <h3>Vaccine Reminders</h3>
+            <p>Stay updated with timely vaccine alerts for your child.</p>
+        </div>
+
+        <div class="feature-card">
+            <img src="{{ url_for('static', filename='growth.jpg') }}" alt="Growth Monitoring">
+            <h3>Growth Monitoring</h3>
+            <p>Track height and weight with clear visual charts.</p>
+        </div>
+
+        <div class="feature-card">
+            <img src="{{ url_for('static', filename='baby.jpg.jpg') }}" alt="Parent Friendly">
+            <h3>Parent Friendly</h3>
+            <p>Simple and easy-to-use interface for parents.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 Smart Childcare. All Rights Reserved.</p>
+    </footer>
+</body>
+</html>
+

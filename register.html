@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center vh-100">
+  <div class="card shadow-lg p-4" style="max-width: 500px; width: 100%;">
+    <h2 class="text-center mb-4">
+      <i class="fas fa-user-plus text-primary"></i> Create Account
+    </h2>
+    <form method="POST" action="{{ url_for('register') }}">
+      
+      <!-- Username -->
+      <div class="mb-3">
+        <label for="username" class="form-label">
+          <i class="fas fa-user"></i> Username
+        </label>
+        <input type="text" class="form-control" id="username" name="username" required>
+      </div>
+      
+        <!-- Email -->
+      <div class="mb-3">
+        <label for="email" class="form-label">
+          <i class="fas fa-envelope"></i> Email
+        </label>
+        <input type="email" class="form-control" id="email" name="email" required>
+      </div>
+      
+      <!-- Phone Number -->
+      <div class="mb-3">
+        <label for="phone" class="form-label">
+          <i class="fas fa-phone"></i> Phone Number
+        </label>
+        <input type="tel" class="form-control" id="phone" name="phone" 
+               pattern="[0-9]{10}" placeholder="Enter 10-digit number" required>
+      </div>
+
+      <!-- Password -->
+      <div class="mb-3">
+        <label for="password" class="form-label">
+          <i class="fas fa-lock"></i> Password
+        </label>
+        <input type="password" class="form-control" id="password" name="password" 
+               onfocus="showPasswordHint()" onkeyup="checkPasswordStrength()" required>
+        
+        <!-- Hidden initially -->
+        <div id="passwordHelp" class="form-text text-muted mt-2" style="display: none;">
+          Must contain:  
+          <ul class="mb-0">
+            <li>At least 8 characters</li>
+            <li>One uppercase & one lowercase letter</li>
+            <li>One number</li>
+            <li>One special character (!@#$%^&*)</li>
+          </ul>
+        </div>
+        <div id="strengthMessage" class="mt-2 fw-bold"></div>
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="mb-3">
+        <label for="confirm_password" class="form-label">
+          <i class="fas fa-key"></i> Confirm Password
+        </label>
+        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="btn btn-primary w-100">
+        <i class="fas fa-check-circle"></i> Register
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Password Strength Script -->
+<script>
+function showPasswordHint() {
+    document.getElementById("passwordHelp").style.display = "block";
+}
+
+function checkPasswordStrength() {
+    const password = document.getElementById("password").value;
+    const strengthMessage = document.getElementById("strengthMessage");
+    let strength = 0;
+
+    if (password.length >= 8) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[a-z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[@$!%*?&]/.test(password)) strength++;
+
+    if (strength === 0) {
+        strengthMessage.innerHTML = "";
+    } else if (strength <= 2) {
+        strengthMessage.innerHTML = "Weak ❌";
+        strengthMessage.className = "text-danger fw-bold";
+    } else if (strength === 3 || strength === 4) {
+        strengthMessage.innerHTML = "Medium ⚠️";
+        strengthMessage.className = "text-warning fw-bold";
+    } else if (strength === 5) {
+        strengthMessage.innerHTML = "Strong ✅";
+        strengthMessage.className = "text-success fw-bold";
+    }
+}
+</script>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+{% endblock %}
+

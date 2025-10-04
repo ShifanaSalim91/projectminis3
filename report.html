@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Vaccine Report{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Vaccine Report</h2>
+{% for child in report_data %}
+  <div class="mb-5">
+    <h4>{{ child.name }} (DOB: {{ child.dob.strftime('%Y-%m-%d') }})</h4>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Vaccine</th>
+          <th>Dose</th>
+          <th>Due Date</th>
+          <th>Date Taken</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in child.vaccines %}
+        <tr>
+          <td>{{ v.vaccine }}</td>
+          <td>{{ v.dose }}</td>
+          <td>{{ v.due_date.strftime('%Y-%m-%d') if v.due_date else 'N/A' }}</td>
+          <td>{{ v.date_taken.strftime('%Y-%m-%d') if v.date_taken else 'N/A' }}</td>
+          <td>
+            {% if v.status == 'completed' %}
+              <span class="badge bg-success">Completed</span>
+            {% elif v.status == 'missed' %}
+              <span class="badge bg-danger">Missed</span>
+            {% else %}
+              <span class="badge bg-primary">Upcoming</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endfor %}
+{% endblock %}

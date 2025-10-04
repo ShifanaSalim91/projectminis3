@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Growth Tracking for {{ child.name }}{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h3>Growth Tracking for {{ child.name }}</h3>
+    <div class="alert alert-info mb-3">
+        <strong>Growth Assessment:</strong> {{ status }}
+        <br>
+        <small>
+            This assessment is based on WHO Child Growth Standards for ages 0–15 years.
+            If your child's growth is below the recommended range, please consult a pediatrician for further advice.
+        </small>
+    </div>
+    <a href="{{ url_for('add_growth', child_id=child.id) }}" class="btn btn-primary mb-3">Add Growth Record</a>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Height (cm)</th>
+                <th>Weight (kg)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rec in growth_records %}
+            <tr>
+                <td>{{ rec.date.strftime('%Y-%m-%d') }}</td>
+                <td>{{ rec.height_cm or 'N/A' }}</td>
+                <td>{{ rec.weight_kg or 'N/A' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <h5 class="mt-4">Growth Chart (WHO Standard)</h5>
+    <canvas id="growthBarChart" width="100%" height="40"></canvas>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const dates = [{% for rec in growth_records %}"{{ rec.date.strftime('%Y-%m-%d') }}",{% endfor %}];
+        const heights = [{% for rec in growth_records %}{{ rec.height_cm or 'null' }},{% endfor %}];
+        const weights = [{% for rec in growth_records %}{{ rec.weight_kg or 'null' }},{% endfor %}];
+
+        const ctx = document.getElementById('growthBarChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: dates,
+                datasets: [
+                    {
+                        label: 'Height (cm)',
+                        data: heights,
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                    },
+                    {
+                        label: 'Weight (kg)',
+                        data: weights,
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: 'Child Growth Over Time (Bar Chart)' }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Measurement' }
+                    }
+                }
+            }
+        });
+    </script>
+    <div class="mt-4">
+        <strong>Instructions:</strong>
+        <ul>
+            <li>Enter your child's height and weight every month for accurate tracking.</li>
+            <li>The chart above compares your child's growth to WHO standards for ages 0–15 years.</li>
+            <li>If the assessment indicates growth below the recommended range, please consult a pediatrician.</li>
+            <li>For more details on WHO standards, visit <a href="https://www.who.int/tools/child-growth-standards/standards" target="_blank">WHO Child Growth Standards</a>.</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

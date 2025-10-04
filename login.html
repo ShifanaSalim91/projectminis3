@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Childcare - Login</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    /* Small inline adjustments for login page */
+    .login-card .alert {
+        background: #f8d7da;
+        color: #842029;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+    .forgot-link {
+        display: block;
+        text-align: right;
+        margin-top: -10px;
+        margin-bottom: 15px;
+        font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <img src="{{ url_for('static', filename='baby.jpg.jpg') }}" alt="Baby" class="baby-img">
+      <h1>Smart Childcare</h1>
+      <h2>Parent Login</h2>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for cat, msg in messages %}
+            <div class="alert">
+              {{ msg }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST">
+        <input type="text" name="username" placeholder="Enter Username" required>
+        <input type="password" name="password" placeholder="Enter Password" required>
+        <a href="{{ url_for('forgot_password') }}" class="forgot-link">Forgot Password?</a>
+        <button type="submit" class="btn">Login</button>
+      </form>
+
+      <p>Don’t have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+    </div>
+  </div>
+</body>
+</html>
+
