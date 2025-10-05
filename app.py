@@ -162,7 +162,7 @@ def register():
 # ...existing code...
 
 def reminder_worker():
-    WAIT_SECONDS = 60 * 60  # hourly
+    WAIT_SECONDS = 10 * 60  # every 10 minutes
     while True:
         with app.app_context():
             today = date.today()
@@ -171,9 +171,13 @@ def reminder_worker():
             records = VaccinationRecord.query.filter(VaccinationRecord.date_taken.is_(None)).all()
             for r in records:
                 parent = r.child.parent
+                website_url = "http://localhost:5000"  # Change to your deployed URL if needed
                 # 7 days before
                 if r.due_date == week_threshold and not r.reminded_week:
-                    msg = f"Reminder: {r.child.name} is due for {r.vaccine.name} (dose {r.dose_number}) in one week on {r.due_date.strftime('%Y-%m-%d')}."
+                    msg = (
+                        f"Reminder: {r.child.name} is due for {r.vaccine.name} (dose {r.dose_number}) in one week on {r.due_date.strftime('%Y-%m-%d')}.\n"
+                        f"Visit your dashboard: {website_url}"
+                    )
                     if parent.phone:
                         try: send_sms(parent.phone, msg)
                         except: app.logger.exception("sms error")
@@ -184,7 +188,10 @@ def reminder_worker():
                     db.session.commit()
                 # 2 days before
                 if r.due_date == two_day_threshold and not r.reminded_two_day:
-                    msg = f"Urgent: {r.child.name} is due for {r.vaccine.name} (dose {r.dose_number}) in two days on {r.due_date.strftime('%Y-%m-%d')}."
+                    msg = (
+                        f"Urgent: {r.child.name} is due for {r.vaccine.name} (dose {r.dose_number}) in two days on {r.due_date.strftime('%Y-%m-%d')}.\n"
+                        f"Visit your dashboard: {website_url}"
+                    )
                     if parent.phone:
                         try: send_sms(parent.phone, msg)
                         except: app.logger.exception("sms error")
@@ -518,7 +525,36 @@ def send_sms(to_number, body):
         app.logger.exception("Twilio send failed")
 
 def send_email(to_email, subject, body):
-    user = os.getenv('EMAIL_USER'); pwd = os.getenv('EMAIL_PASS')
+    sendgrid_api_key = os.getenv('SENDGRID_API_KEY')
+    user = os.getenv('EMAIL_USER')
+    if sendgrid_api_key and user:
+        try:
+            import requests
+            data = {
+                "personalizations": [{
+                    "to": [{"email": to_email}],
+                    "subject": subject
+                }],
+                "from": {"email": user},
+                "content": [{"type": "text/plain", "value": body}]
+            }
+            resp = requests.post(
+                "https://api.sendgrid.com/v3/mail/send",
+                headers={
+                    "Authorization": f"Bearer {sendgrid_api_key}",
+                    "Content-Type": "application/json"
+                },
+                json=data
+            )
+            if resp.status_code == 202:
+                app.logger.info(f"SendGrid email sent to {to_email}")
+            else:
+                app.logger.error(f"SendGrid email failed: {resp.text}")
+        except Exception:
+            app.logger.exception("SendGrid email send failed")
+        return
+    # fallback to old Gmail method
+    pwd = os.getenv('EMAIL_PASS')
     if not (user and pwd):
         app.logger.debug("Email not configured; email skipped.")
         return
@@ -539,7 +575,7 @@ def growth_history(child_id):
     status = assess_growth(child, growth_records)
     return render_template('growth_history.html', child=child, growth_records=growth_records, status=status)
 def reminder_worker():
-    WAIT_SECONDS = 60 * 60  # hourly
+    WAIT_SECONDS = 10 * 60 # hourly
     while True:
         with app.app_context():
             today = date.today()
@@ -573,7 +609,7 @@ def reminder_worker():
         time.sleep(WAIT_SECONDS)
 
 def growth_reminder_worker():
-    WAIT_SECONDS = 60 * 60 * 24  # daily
+    WAIT_SECONDS = 10 * 60 # every 10 minutes
     while True:
         with app.app_context():
             today = date.today()
@@ -581,7 +617,11 @@ def growth_reminder_worker():
                 latest = GrowthRecord.query.filter_by(child_id=child.id).order_by(GrowthRecord.date.desc()).first()
                 if not latest or latest.date.month != today.month or latest.date.year != today.year:
                     parent = child.parent
-                    msg = f"Reminder: Please enter {child.name}'s height and weight for {today.strftime('%B %Y')}."
+                    website_url = "http://localhost:5000"  # Change to your deployed URL if needed
+                    msg = (
+                        f"Reminder: Please enter {child.name}'s height and weight for {today.strftime('%B %Y')}.\n"
+                        f"Visit your dashboard: {website_url}"
+                    )
                     if parent.phone:
                         try: send_sms(parent.phone, msg)
                         except: app.logger.exception("sms error")
